@@ -12,5 +12,5 @@ masters:flip .mail.string each/: flip masters
 
 add .mail.table update R1:.mail.bgcolour["red"] each R1 from masters where ("J"$R1)>72;
 
-.mail.send["tom@ubuntumate.com";"tommartin@outlook.com";"2016 Masters";BODY];
+.mail.send["from@doman.com";"to@domain.com";"2016 Masters";BODY];
 exit 0
