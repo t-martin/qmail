@@ -78,9 +78,61 @@
 .mail.zdict:{.mail.dict0[x;1b]}
 
 // ======================
-// Colour ladders
+// Colour scales
 // ======================
 
+.mail.color.normalize:{[low;high;x]0f | 1f & (x - low)%(high - low)};
+
+.mail.color.hsv2rgb:{[h;s;v]
+  //hsv is easier to deal with but convert to RGB
+  //for compatibility
+  C:v*s;
+  H:(h mod 360f)%60f;
+  X:C * 1 - abs -1f + H mod 2;
+  m:v-C;
+  D:`s#0 1 2 3 4 5 6f!
+    (1 2 0;2 1 0;0 1 2;0 2 1;2 0 1;1 0 2;0 0 0);
+  RGB:m + (0f;C;X)D H;
+  `byte$255*RGB
+  };
+
+.mail.color.hue_map:(!). flip (
+  (`red; 0);
+  (`orange; 30);
+  (`yellow; 60);
+  (`lime; 90);
+  (`green; 120);
+  (`turquoise; 150);
+  (`cyan; 180);
+  (`blue; 240);
+  (`purple; 270);
+  (`pink; 300);
+  (`violet;330)
+  );
+
+.mail.color.colorize_mono:{[color;min_val;max_val;x]
+  //fix the h + v and vary the saturation only
+  s_values:.mail.color.normalize[min_val;max_val;x];
+  .mail.color.hsv2rgb[.mail.color.hue_map[color];;1f]each s_values
+  };
+
+.mail.color.colorize_mono_auto:{[color;x]
+  .mail.color.colorize_mono[color;min x;max x;x]
+  };
+
+.mail.color.colorize_stereo:{[color_min;color_max;min_val;max_val;pivot_val;x]
+  low:x<pivot_val;
+  high_indices:where not low;
+  low_indices:where low;
+  low_colors:.mail.color.colorize_mono[color_min;pivot_val;min_val;x low_indices];
+  high_colors:.mail.color.colorize_mono[color_max;pivot_val;max_val;x high_indices];
+  @[;high_indices;:;high_colors] @[;low_indices;:;low_colors] count[x]#enlist 0x000000
+  };
+
+.mail.color.colorize_stereo_auto:{[color_min;color_max;x]
+  //pivots around zero
+  .mail.color.colorize_stereo[color_min;color_max;min x;max x;0f;x]
+  };
 
 // =======================
 // CSS
