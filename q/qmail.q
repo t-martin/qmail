@@ -5,7 +5,7 @@
 // Sendmail wrapper
 // ===========================
 .mail.send:{[frm;to;sub;body]
-  fn:`$":/tmp/qmail_",raze string (.z.i;"j"$.z.p);
+  fn:hsym`$first system"mktemp qmail.XXXXXXXXXX";
   mail:.mail.template[frm;to;sub;body];
   fn 0: mail;
   @[system;"sendmail -t < ",1_string fn;{[x;y]hdel y;'"qmail error"}[;fn]];
