@@ -81,7 +81,13 @@
 // Colour scales
 // ======================
 
+///
+//normalise numerics between 0 and 1 based on min/max value
 .mail.color.normalize:{[low;high;x]0f | 1f & (x - low)%(high - low)};
+
+///
+//convert q hex value to html representation
+.mail.color.hex2html:{"#",raze string x};
 
 .mail.color.hsv2rgb:{[h;s;v]
   //hsv is easier to deal with but convert to RGB
