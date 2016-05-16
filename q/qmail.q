@@ -4,13 +4,19 @@
 // ===========================
 // Sendmail wrapper
 // ===========================
-.mail.send:{[frm;to;sub;body]
+.mail.utilityexists:{not 0b~@[system;"which ",x," 2>/dev/null";{0b}]};
+
+.mail.sendAtt:{[frm;to;sub;body;att]
+  if[not .mail.utilityexists "sendmail"; '"'sendmail' not found"];
+  if[not att~"";if[10h=type att;att:enlist att]];
   fn:hsym`$first system"mktemp qmail.XXXXXXXXXX";
-  mail:.mail.template[frm;to;sub;body];
+  mail:$[""~att;.mail.template[frm;to;sub;body];.mail.templateAtt[frm;to;sub;body;att]];
   fn 0: mail;
   @[system;"sendmail -t < ",1_string fn;{[x;y]hdel y;'"qmail error"}[;fn]];
-  //hdel fn;
+  hdel fn;
   };
+
+.mail.send:{[frm;to;sub;body] .mail.sendAtt[frm;to;sub;body;""]}
 
 .mail.template:{[frm;to;sub;body]
   enlist["From: ",frm],
@@ -23,13 +29,47 @@
   .mail.footer
   };
 
+.mail.templateAtt:{[frm;to;sub;body;att]
+  boundary:"====",string[rand 0Ng],"====";
+  enlist["From: ",frm],
+  enlist["To: ",to],
+  enlist["Subject: ",sub],
+  enlist["Content-Type: multipart/mixed; boundary=\"",boundary,"\""],
+  enlist["MIME-Version: 1.0"],
+  enlist["This is a multi-part message in MIME format."],
+  enlist["--",boundary],
+  enlist["Content-Type: text/html"],
+  .mail.header[],
+  body,
+  .mail.footer,
+  (raze {[att;boundary]
+    enlist["--",boundary],
+    enlist["Content-Transfer-Encoding: base64"],
+    enlist["Content-Type: ",.mail.mimetype[att],"; name=",last "/"vs att],
+    enlist["Content-Disposition: attachment; filename=",last "/"vs att],
+    enlist[""],
+    .mail.base64encode[att]
+  }[;boundary] each att),
+  enlist["--",boundary,"--"]
+  };
+
+
 .mail.header:{[]
   raze(enlist "<html>";
-  //.mail.ewrap["head";.mail.css];
-  enlist "<body style=\"width:100%; marging:0; padding:0;\">")
+  enlist "<body style=\"width:100%; marging:0; padding:0; font-size:12px;\">")
   };
 
 .mail.footer:("</body>";"</html>");
+
+.mail.base64encode:{[a]
+  if[not .mail.utilityexists "base64"; '"'base64' not found"];
+  system"base64 ",a
+  };
+
+.mail.mimetype:{[a]
+  if[not .mail.utilityexists "file"; :"text/plain"];
+  trim last ":" vs first @[system;"file --mime-type ",a;{"text/plain"}]
+  };
 
 // =========================
 // HTML tag wrappers 
@@ -45,15 +85,15 @@
 .mail.italic:{.mail.wrap[.mail.addstyle["i";`body];.mail.string x]};
 
 .mail.ifins:{$[""~y;y;x,":",y," "]};
-.mail.colours:{[colour;bg;size;text] 
-  styledict:(`$("color";"background-color";"font-size"))!(colour;bg;size);
+.mail.colors:{[color;bg;size;text] 
+  styledict:(`$("color";"background-color";"font-size"))!(color;bg;size);
   styledict:#[;styledict]where not ""~/:styledict;
   style:.mail.dict2css (`$"font-family") _ .mail.css.body[],styledict;
   .mail.wrap["p style=\"",style,"\"";.mail.string[text]]};
 
-.mail.colour:{.mail.colours[x;"";"";y]};
-.mail.size:{.mail.colours["";"";x;y]};
-.mail.bgcolour:{.mail.colours["";x;"";y]};
+.mail.addcolor:{.mail.colors[x;"";"";y]};
+.mail.size:{.mail.colors["";"";x;y]};
+.mail.bgcolor:{.mail.colors["";x;"";y]};
 
 .mail.url:{[url;txt] .mail.wrap[.mail.addstyle["a href=\"",url,"\"";`body];txt]};
 .mail.setbookmark:{[id] "<a name=\"",id,"\"></a>"};
@@ -74,8 +114,8 @@
   .mail.ewrap["table class=\"altrowstable\"";b]
   };
 
-.mail.dict:{.mail.dict0[x;0b]}
-.mail.zdict:{.mail.dict0[x;1b]}
+.mail.dict:{.mail.dict0[x;0b]};
+.mail.zdict:{.mail.dict0[x;1b]};
 
 // ======================
 // Colour scales
@@ -119,7 +159,7 @@
 .mail.color.colorize_mono:{[color;min_val;max_val;x]
   //fix the h + v and vary the saturation only
   s_values:.mail.color.normalize[min_val;max_val;x];
-  .mail.color.hsv2rgb[.mail.color.hue_map[color];;1f]each s_values
+  .mail.color.hsv2rgb[$[-11h=type color;.mail.color.hue_map[color];color];;1f]each s_values
   };
 
 .mail.color.colorize_mono_auto:{[color;x]
@@ -143,7 +183,6 @@
 // =======================
 // CSS
 // ========================
-//.mail.getandaddstyle:{.mail.addstyle[x;.mail.getstyle y]};
 .mail.getstyle:{(.mail.css . (),x)[]}
 .mail.addstyle:{x," style=\"",(.mail.dict2css .mail.getstyle[y]),"\""}
 .mail.getcustomstyle:{$[99h;$[`qmailstylemeta in key x;x`qmailstylemeta;()!()];()!()]};
@@ -151,15 +190,15 @@
 
 .mail.css.body:{
   (!) . flip 2 cut(
-  `$"font-family";"\"Trebuchet MS\", Helvetica, Sans-Serif";
-  `$"font-size";"14px";
+  `$"font-family";"Verdana, Geneva, Sans-Serif";
   `$"color";"#2f4a5c")
   };
+
 .mail.css.table.all:{
   .mail.css.body[],
   (!) . flip 2 cut(
   `$"font-family";"Verdana, Geneva, Sans-Serif";
-  `$"font-size";"11px";
+  `$"font-size";"12px";
   `margin;"0 ";
   `padding;"3px";
   //`width;"100%";
