@@ -5,12 +5,13 @@
 // Sendmail wrapper
 // ===========================
 .mail.utilityexists:{not 0b~@[system;"which ",x," 2>/dev/null";{0b}]};
+.mail.checkfile:{if[not count key hsym x;'"file not found: ",.mail.hsym2str x]}
 
 .mail.sendAtt:{[frm;to;sub;body;att]
   if[not .mail.utilityexists "sendmail"; '"'sendmail' not found"];
   if[not att~"";if[10h=type att;att:enlist att]];
   fn:hsym`$first system"mktemp qmail.XXXXXXXXXX";
-  mail:$[""~att;.mail.template[frm;to;sub;body];.mail.templateAtt[frm;to;sub;body;att]];
+  mail:.mail.template[frm;to;sub;body;att];
   fn 0: mail;
   @[system;"sendmail -t < ",1_string fn;{[x;y]hdel y;'"qmail error"}[;fn]];
   hdel fn;
@@ -18,7 +19,7 @@
 
 .mail.send:{[frm;to;sub;body] .mail.sendAtt[frm;to;sub;body;""]}
 
-.mail.template:{[frm;to;sub;body]
+.mail.template0:{[frm;to;sub;body]
   enlist["From: ",frm],
   enlist["To: ",to],
   enlist["Subject: ",sub],
@@ -29,7 +30,8 @@
   .mail.footer
   };
 
-.mail.templateAtt:{[frm;to;sub;body;att]
+.mail.template:{[frm;to;sub;body;att]
+  if[not count att;:mail.template0[frm;tp;sub;body]];
   boundary:"====",string[rand 0Ng],"====";
   enlist["From: ",frm],
   enlist["To: ",to],
@@ -45,11 +47,11 @@
   (raze {[att;boundary]
     enlist["--",boundary],
     enlist["Content-Transfer-Encoding: base64"],
-    enlist["Content-Type: ",.mail.mimetype[att],"; name=",last "/"vs att],
-    enlist["Content-Disposition: attachment; filename=",last "/"vs att],
+    enlist["Content-Type: ",.mail.mimetype[att],"; name=",fn],
+    enlist["Content-Disposition: attachment; filename=",fn:last "/"vs .mail.hsym2str att],
     enlist[""],
     .mail.base64encode[att]
-  }[;boundary] each att),
+  }[;boundary] each (),att),
   enlist["--",boundary,"--"]
   };
 
@@ -61,15 +63,17 @@
 
 .mail.footer:("</body>";"</html>");
 
-.mail.base64encode:{[a]
-  if[not .mail.utilityexists "base64"; '"'base64' not found"];
-  system"base64 ",a
-  };
+.mail.base64encode:{[x]
+  .mail.checkfile x; 
+  76 cut .Q.b6 2 sv'6 cut raze 0b vs' read1 x}
 
 .mail.mimetype:{[a]
   if[not .mail.utilityexists "file"; :"text/plain"];
-  trim last ":" vs first @[system;"file --mime-type ",a;{"text/plain"}]
+  .mail.checkfile a;
+  trim last ":" vs first @[system;"file --mime-type ",.mail.hsym2str a;{enlist ": text/plain"}]
   };
+
+.mail.hsym2str:{[x] $[":"=first s:string x;1_s;s]}
 
 // =========================
 // HTML tag wrappers 
