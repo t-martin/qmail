@@ -92,7 +92,7 @@ Size, colour and background colour can be combined using `.mail.colors`, which t
 
 ### Sending the email
 
-Once the HTML body has been generated, it can be send using `.mail.send`. This takes five paramers:
+Once the HTML body has been generated, it can be send using `.mail.send`. This takes five parameters:
 
    * The 'from' address (string)
    * The 'to' address (string containing "," delimited list of recipient email addresses)
