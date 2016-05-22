@@ -5,9 +5,9 @@
 // Sendmail wrapper
 // ===========================
 .mail.utilityexists:{not 0b~@[system;"which ",x," 2>/dev/null";{0b}]};
-.mail.checkfile:{if[not count key hsym x;'"file not found: ",.mail.hsym2str x]}
+.mail.checkfile:{if[not x~key x:hsym x;'"file not found: ",.mail.hsym2str x]}
 
-.mail.sendAtt:{[frm;to;sub;body;att]
+.mail.send:{[frm;to;sub;body;att]
   if[not .mail.utilityexists "sendmail"; '"'sendmail' not found"];
   if[not att~"";if[10h=type att;att:enlist att]];
   fn:hsym`$first system"mktemp qmail.XXXXXXXXXX";
@@ -16,8 +16,6 @@
   @[system;"sendmail -t < ",1_string fn;{[x;y]hdel y;'"qmail error"}[;fn]];
   hdel fn;
   };
-
-.mail.send:{[frm;to;sub;body] .mail.sendAtt[frm;to;sub;body;""]}
 
 .mail.template0:{[frm;to;sub;body]
   enlist["From: ",frm],
@@ -31,7 +29,7 @@
   };
 
 .mail.template:{[frm;to;sub;body;att]
-  if[not count att;:mail.template0[frm;tp;sub;body]];
+  if[not count att where not null att,:();:.mail.template0[frm;to;sub;body]];
   boundary:"====",string[rand 0Ng],"====";
   enlist["From: ",frm],
   enlist["To: ",to],
@@ -51,14 +49,14 @@
     enlist["Content-Disposition: attachment; filename=",fn:last "/"vs .mail.hsym2str att],
     enlist[""],
     .mail.base64encode[att]
-  }[;boundary] each (),att),
+  }[;boundary] each att),
   enlist["--",boundary,"--"]
   };
 
 
 .mail.header:{[]
   raze(enlist "<html>";
-  enlist "<body style=\"width:100%; marging:0; padding:0; font-size:12px;\">")
+  enlist "<body style=\"width:100%; marging:0; padding:0; font-size:15px;\">")
   };
 
 .mail.footer:("</body>";"</html>");
@@ -90,7 +88,7 @@
 
 .mail.ifins:{$[""~y;y;x,":",y," "]};
 .mail.colors:{[color;bg;size;text] 
-  styledict:(`$("color";"background-color";"font-size"))!(color;bg;size);
+  styledict:(`$("color";"background-color";"font-size";"display"))!(color;bg;size;"inline");
   styledict:#[;styledict]where not ""~/:styledict;
   style:.mail.dict2css (`$"font-family") _ .mail.css.body[],styledict;
   .mail.wrap["p style=\"",style,"\"";.mail.string[text]]};
@@ -114,7 +112,7 @@
 .mail.table:{.mail.table0[x;0b]};
 
 .mail.dict0:{[d;alt]
-  b:raze .mail.row'[.mail.addstyle["td"] each`table`row,/:$[alt;?[1=til[count t]mod 2;`odd;`even];count[t]#`even];flip(key;value)@\:d];   
+  b:raze .mail.row'[.mail.addstyle["td"] each`table`row,/:$[alt;?[1=til[count d]mod 2;`odd;`even];count[d]#`even];flip(key;value)@\:d];   
   .mail.ewrap["table class=\"altrowstable\"";b]
   };
 
@@ -202,7 +200,7 @@
   .mail.css.body[],
   (!) . flip 2 cut(
   `$"font-family";"Verdana, Geneva, Sans-Serif";
-  `$"font-size";"12px";
+  `$"font-size";"15px";
   `margin;"0 ";
   `padding;"3px";
   //`width;"100%";
