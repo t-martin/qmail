@@ -56,7 +56,9 @@ Size, colour and background colour can be combined using `.mail.colors`, which t
    * font size (string)
    * text (string)
 
-    .mail.colors["#FFFFFF";"#FF0000";"15";"Red background, white text, font size 15"];
+    `.mail.colors["#FFFFFF";"#FF0000";"15";"Red background, white text, font size 15"];`
+
+![alt text](https://raw.githubusercontent.com/t-martin/qmail/master/img/bg2.PNG "Background Colour")
 
 ##### Colour Scales
 The library contains functions to help create colour scales, allowing you conditionally colour objects based on their underlying values.
@@ -103,8 +105,6 @@ These functions could be used on a table of golf scores. Each players score coul
 
 ![alt text](https://raw.githubusercontent.com/t-martin/qmail/master/img/masters.PNG "Masters")
 
-
-![alt text](https://raw.githubusercontent.com/t-martin/qmail/master/img/bg2.PNG "Background Colour")
 
 #### Size
     .mail.size[;"text in increasing sizes"] each string 15+til 5
