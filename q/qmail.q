@@ -88,9 +88,9 @@
 
 .mail.ifins:{$[""~y;y;x,":",y," "]};
 .mail.colors:{[color;bg;size;text] 
-  styledict:(`$("color";"background-color";"font-size";"display"))!(color;bg;size;"inline");
+  styledict:(`$("color";"background-color";"font-size";"display"))!(color;bg;size,"px";"inline");
   styledict:#[;styledict]where not ""~/:styledict;
-  style:.mail.dict2css (`$"font-family") _ .mail.css.body[],styledict;
+  style:.mail.dict2css .mail.css.body[],styledict;
   .mail.wrap["p style=\"",style,"\"";.mail.string[text]]};
 
 .mail.addcolor:{.mail.colors[x;"";"";y]};
