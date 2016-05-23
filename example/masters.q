@@ -22,4 +22,4 @@ masters:select
 add .mail.table masters;
 
 .mail.send["from@domain.com";"to@domain.com";"2016 Masters";BODY;`:masters.csv];
-xit 0
+exit 0

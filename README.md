@@ -75,7 +75,7 @@ Size, colour and background colour can be combined using `.mail.colors`, which t
     .mail.getbookmark["topofpage"; "Return to Top"]; //create hyperlink which takes the user to the top of the email 
 
 ### Tables
-`.mail.ztable` creates a dictionary with rows of alternating colours. `.mail.table` creates a dictionary with a simple, white background 
+`.mail.ztable` creates a table with rows of alternating colours. `.mail.table` creates a table with a simple, white background 
 
     .mail.table ([]a:1 2 3 4;b:4?`4;c:("abc";"def";"feg";"sdd"))
     .mail.ztable ([]a:1 2 3 4;b:4?`4;c:("abc";"def";"feg";"sdd"))
