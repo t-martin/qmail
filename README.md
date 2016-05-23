@@ -1,4 +1,4 @@
- qmail
+# qmail
 
 qmail is a library which allows you to send HTML emails from inside kdb+ processes. It uses the linux 'sendmail' utility.
 
@@ -6,7 +6,7 @@ NOTE: all CSS is inline in order to maintain compatibilty with gmail.
 
 ## Usage
 
-To send a HTML email, you need to build up strings of HTML code. qmail provides numerous HTML wrapper functions which can be used to convert q structures to HTMLs.
+To send a HTML email, you need to build up strings of HTML code. qmail provides numerous HTML wrapper functions which can be used to convert q structures to HTML.
 
 ### Headings
 `.mail.heading` will create HTML heading objects.
