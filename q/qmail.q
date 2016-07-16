@@ -63,7 +63,10 @@
 
 .mail.base64encode:{[x]
   .mail.checkfile x; 
-  76 cut .Q.b6 2 sv'6 cut raze 0b vs' read1 x}
+  d:read1 x;c:count[d]mod 3;
+  pc:count p:(0x;0x0000;0x00)c;
+  b:.Q.b6 2 sv/: 6 cut raze 0b vs/: d,p;
+  76 cut(neg[pc] _ b),pc#"="};
 
 .mail.mimetype:{[a]
   if[not .mail.utilityexists "file"; :"text/plain"];
