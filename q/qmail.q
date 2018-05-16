@@ -48,7 +48,7 @@
     enlist["Content-Type: ",.mail.mimetype[att],"; name=",fn],
     enlist["Content-Disposition: attachment; filename=",fn:last "/"vs .mail.hsym2str att],
     enlist[""],
-    .mail.base64encode[att]
+    .mail.encodefile[att]
   }[;boundary] each att),
   enlist["--",boundary,"--"]
   };
@@ -61,12 +61,17 @@
 
 .mail.footer:("</body>";"</html>");
 
-.mail.base64encode:{[x]
-  .mail.checkfile x; 
-  d:read1 x;c:count[d]mod 3;
+.mail.base64encode:$[.z.K >= 3.6;76 cut .Q.btoa@;{
+  c:count[x]mod 3;
   pc:count p:(0x;0x0000;0x00)c;
-  b:.Q.b6 2 sv/: 6 cut raze 0b vs/: d,p;
-  76 cut(neg[pc] _ b),pc#"="};
+  b:.Q.b6 2 sv/: 6 cut raze 0b vs/: x,p;
+  76 cut(neg[pc] _ b),pc#"="}];
+
+.mail.encodefile:{
+    .mail.checkfile x;
+    X:read1 x;
+    .mail.base64encode X
+    };
 
 .mail.mimetype:{[a]
   if[not .mail.utilityexists "file"; :"text/plain"];
