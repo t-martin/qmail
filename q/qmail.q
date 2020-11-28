@@ -10,7 +10,7 @@
 .mail.send:{[frm;to;sub;body;att]
   if[not .mail.utilityexists "sendmail"; '"'sendmail' not found"];
   if[not att~"";if[10h=type att;att:enlist att]];
-  fn:hsym`$first system"mktemp qmail.XXXXXXXXXX";
+  fn:hsym`$first system"mktemp /tmp/qmail.XXXXXXXXXX";
   mail:.mail.template[frm;to;sub;body;att];
   fn 0: mail;
   @[system;"sendmail -t < ",1_string fn;{[x;y]hdel y;'"qmail error"}[;fn]];
